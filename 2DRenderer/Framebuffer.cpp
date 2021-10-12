@@ -1,5 +1,9 @@
 #include "Framebuffer.h"
 
+//#define SLOPE 
+#define DDA 
+//#define BRESENHAM 
+
 Framebuffer::Framebuffer(Renderer* renderer, int width, int height)
 {
     this->width = width;
@@ -53,6 +57,8 @@ void Framebuffer::DrawLine(int x1, int y1, int x2, int y2, const color_t& color)
     // Solve m 
     int dx = x2 - x1; // run 
     int dy = y2 - y1; // rise
+
+#if defined(SLOPE)
     if (dx == 0)
     {
         if (y1 > y2) std::swap(y1, y2);
@@ -87,9 +93,188 @@ void Framebuffer::DrawLine(int x1, int y1, int x2, int y2, const color_t& color)
             }
         }
     }
+#elif defined(DDA)
+    int steps = std::max(std::abs(dx), std::abs(dy)); 
+    float ddx = dx / (float)steps; 
+    float ddy = dy / (float)steps; 
 
+    float x = (float)x1; 
+    float y = (float)y1; 
+
+    for (int i = 0; i < steps; i++)
+    {
+        DrawPoint((int)x, (int)y, color); 
+        x += ddx; 
+        y += ddy; 
+    }
+
+#elif defined(BRESENHAM)
+    bool steep = std::abs(dx) < std::abs(dy);
+    if (steep)
+    {
+        // steep slope
+        std::swap(x1, y1);
+        std::swap(x2, y2);
+}
+
+    if (x1 > x2)
+    {
+        // left -> right
+        std::swap(x1, x2);
+        std::swap(y1, y2);
+    }
+
+    dx = x2 - x1;
+    dy = std::abs(y2 - y1);
+
+    int error = dx / 2;
+    int ystep = (y1 < y2) ? 1 : -1;
+
+    for (int x = x1, y = y1; x <= x2; x++)
+    {
+        (steep) ? DrawPoint(y, x, color) : DrawPoint(x, y, color);
+
+        error -= dy;
+        if (error < 0)
+        {
+            y += ystep;
+            error += dx;
+        }
+    }
+
+#endif 
+}
+
+void Framebuffer::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, const color_t& color)
+{
+    // connect the points to form a triangle
+    DrawLine(x1, y1, x2, y2, color); 
+    DrawLine(x2, y2, x3, y3, color); 
+    DrawLine(x3, y3, x1, y1, color); 
 }
 
 void Framebuffer::DrawCircle(int x, int y, int radius, const color_t& color)
 {
+    //int x2 = 0;
+    //int y2 = radius;
+    //int d = 3 - 2 * radius;
+
+    //DrawCircleOctants(x, y, x2, y2, color);
+    //while (y >= x)
+    //{
+    //    x++;
+    //    if (d > 0) // east - south
+    //    {
+    //        y--;
+    //        d = d + 4 * (x - y) + 10;
+    //    }
+    //    else // east
+    //    {
+    //        d = d + 4 * x + 6;
+    //        DrawCircleOctants(x, y, x2, y2, color);
+    //    }
+    //}
+     
+    float x1 = x - radius, x2 = x + radius; 
+    float y1 = y - radius, y2 = y + radius; 
+
+    for (float sx = x1; sx < x2; sx++)
+    {
+        for (float sy = y1; sy < y2; sy++)
+        {
+            float distsqu = (sx - x) * (sx - x) + (sy - y) * (sy - y); 
+            if (distsqu <= radius * radius)
+                DrawPoint(sx, sy, color); 
+        }
+    }
+}
+
+void Framebuffer::DrawCircleOctants(int cx, int cy, int x, int y, const color_t& color)
+{
+    DrawPoint(cx + x, cy + y, color);
+    DrawPoint(cx + x, cy - y, color);
+    DrawPoint(cx - x, cy + y, color);
+    DrawPoint(cx - x, cy - y, color);
+
+    DrawPoint(cx + y, cy + x, color);
+    DrawPoint(cx + y, cy - x, color);
+    DrawPoint(cx - y, cy + x, color);
+    DrawPoint(cx - y, cy - x, color);
+}
+
+void Framebuffer::DrawSimpleCurve(int x1, int y1, int x2, int y2, int steps, const color_t& color)
+{
+    float dt = 1.0f / steps; 
+    for (int i = 0; i < steps; i++)
+    {
+        float t1 = i * dt; 
+        float t2 = (i + 1) * dt; 
+
+        int sx1 = Lerp(x1, x2, t1); 
+        int sy1 = Lerp(y1, y2, t1); 
+
+        int sx2 = Lerp(x1, x2, t2);
+        int sy2 = Lerp(y1, y2, t2);
+
+        DrawLine(sx1, sy1, sx2, sy2, color); 
+    }
+}
+
+void Framebuffer::DrawQuadraticCurve(int x1, int y1, int x2, int y2, int x3, int y3, int steps, const color_t& color)
+{
+    float dt = 1.0f / steps;
+    for (int i = 0; i < steps; i++)
+    {
+        float t1 = i * dt;
+        float t2 = (i + 1) * dt;
+
+        float a1 = (float)pow((1.0f - t1), 2.0f);
+        float b1 = 2.0f * (1.0f - t1) * t1;
+        float c1 = (float)pow(t1, 2.0f);
+
+        int sx1 = (int)(a1 * x1 + b1 * x2 + c1 * x3); 
+        int sy1 = (int)(a1 * y1 + b1 * y2 + c1 * y3);
+
+        float a2 = (float)pow((1.0f - t2), 2.0f);
+        float b2 = 2.0f * (1.0f - t2) * t2;
+        float c2 = (float)pow(t2, 2.0f);
+
+        int sx2 = (int)(a2 * x1 + b2 * x2 + c2 * x3);
+        int sy2 = (int)(a2 * y1 + b2 * y2 + c2 * y3);
+
+        DrawLine(sx1, sy1, sx2, sy2, color); 
+    }
+}
+
+void Framebuffer::DrawCubicCurve(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, int steps, const color_t& color)
+{
+    float dt = 1.0f / steps;
+    for (int i = 0; i < steps; i++)
+    {
+        float t1 = i * dt;
+        float t2 = (i + 1) * dt;
+
+        float a1 = (float)pow((1.0f - t1), 2.0f);
+        float b1 = 2.0f * (1.0f - t1) * t1;
+        float c1 = (float)pow(t1, 2.0f);
+        float d1 = 2.0f * t1 * t1;
+
+        int sx1 = (int)(a1 * x1 + b1 * x2 + c1 * x3 + d1 * x4);
+        int sy1 = (int)(a1 * y1 + b1 * y2 + c1 * y3 + d1 * y4);
+
+        float a2 = (float)pow((1.0f - t2), 2.0f);
+        float b2 = 2.0f * (1.0f - t2) * t2;
+        float c2 = (float)pow(t2, 2.0f);
+        float d2 = 2.0f * t2 * t2;
+
+        int sx2 = (int)(a2 * x1 + b2 * x2 + c2 * x3 + d2 * x4);
+        int sy2 = (int)(a2 * y1 + b2 * y2 + c2 * y3 + d2 * y4);
+
+        DrawLine(sx1, sy1, sx2, sy2, color);
+    }
+}
+
+int Framebuffer::Lerp(int a, int b, float t)
+{
+    return (int)(a + ((b - a) * t));
 }
