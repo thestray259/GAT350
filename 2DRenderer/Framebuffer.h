@@ -24,6 +24,8 @@ public:
 
 	int Lerp(int a, int b, float t); 
 
+	void DrawImage(int x1, int y2, class Image* image);
+
 public:
 	SDL_Texture* texture{ nullptr };
 	uint8_t* buffer{ nullptr };

@@ -1,4 +1,5 @@
 #include "Framebuffer.h"
+#include "Image.h"
 
 //#define SLOPE 
 #define DDA 
@@ -277,4 +278,21 @@ void Framebuffer::DrawCubicCurve(int x1, int y1, int x2, int y2, int x3, int y3,
 int Framebuffer::Lerp(int a, int b, float t)
 {
     return (int)(a + ((b - a) * t));
+}
+
+void Framebuffer::DrawImage(int x1, int y2, Image* image)
+{
+    for (int y = 0; y < image->height; y++)
+    {
+        //int sy = <y start + y>;
+        int sy = y; 
+        for (int x = 0; x < image->width; x++)
+        {
+            //int sx = <x start + x>;
+            int sx = x; 
+            //if (<make sure to not write to the buffer if sx or sy is off - screen>) continue;
+
+            ((color_t*)buffer)[sx + (sy * width)] = ((color_t*)image->buffer)[x + (y * image->width)];
+        }
+    }
 }
