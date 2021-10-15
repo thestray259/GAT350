@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Framebuffer.h"
 #include "Image.h"
+#include "PostProcess.h"
 
 #include <iostream>
 #include <SDL.h>
@@ -14,8 +15,9 @@ int main(int, char**)
 	renderer->Initialize(WIDTH, HEIGHT);
 
 	std::unique_ptr<Framebuffer> framebuffer = std::make_unique<Framebuffer>(renderer.get(), renderer->width, renderer->height); 
+
 	std::unique_ptr<Image> image = std::make_unique<Image>();
-	//image->Load("../resources/color.bmp");
+	image->Load("../Resources/cat.bmp");
 	image->Flip();
 
 	bool quit = false;
@@ -33,7 +35,7 @@ int main(int, char**)
 		framebuffer->Clear({ 0, 0, 0, 0 });
 		for (int i = 0; i < 100; i++)
 		{
-			framebuffer->DrawPoint(rand() % framebuffer->width, rand() % framebuffer->height, { 255, 255, 255, 255 }); 
+			framebuffer->DrawPoint(rand() % renderer->width, rand() % renderer->height, { 255, 255, 255, 255 }); 
 		}
 
 		//for (int i = 0; i < 20; i++)
@@ -43,19 +45,25 @@ int main(int, char**)
 
 		for (int i = 0; i < 20; i++)
 		{
-			framebuffer->DrawLine(framebuffer->width >> 1, framebuffer->height >> 1, rand() % framebuffer->width, rand() % framebuffer->height, { 255, 0, 255, 0 });
+			framebuffer->DrawLine(renderer->width >> 1, renderer->height >> 1, rand() % renderer->width, rand() % renderer->height, { 255, 0, 255, 0 });
 		}
 
-		framebuffer->DrawImage(30, 30, image.get());
+		framebuffer->DrawImage(10, 10, image.get());
 
 		// shapes and lines 
-		framebuffer->DrawRect(300, 300, 50, 30, { 255, 255, 255, 255 }); 
-		framebuffer->DrawTriangle(400, 400, 300, 500, 450, 550, { 255, 255, 255, 255 }); 
-		framebuffer->DrawCircle(100, 100, 50, { 255, 255, 255, 255 }); 
-		framebuffer->DrawSimpleCurve(200, 200, 300, 100, 5, { 255, 255, 255, 255 }); 
-		framebuffer->DrawQuadraticCurve(200, 200, 300, 100, 400, 200, 15, { 255, 255, 255, 255 }); 
-		framebuffer->DrawCubicCurve(200, 200, 300, 100, 400, 200, 500, 100, 30, { 255, 255, 255, 255 }); 
+		//framebuffer->DrawRect(300, 300, 50, 30, { 255, 255, 255, 255 }); 
+		//framebuffer->DrawTriangle(400, 400, 300, 500, 450, 550, { 255, 255, 255, 255 }); 
+		//framebuffer->DrawCircle(100, 100, 50, { 255, 255, 255, 255 }); 
+		//framebuffer->DrawSimpleCurve(200, 200, 300, 100, 5, { 255, 255, 255, 255 }); 
+		//framebuffer->DrawQuadraticCurve(200, 200, 300, 100, 400, 200, 15, { 255, 255, 255, 255 }); 
+		//framebuffer->DrawCubicCurve(200, 200, 300, 100, 400, 200, 500, 100, 30, { 255, 255, 255, 255 }); 
 
+		PostProcess::Invert(framebuffer->colorBuffer); 
+		PostProcess::Monochrome(framebuffer->colorBuffer); 
+		PostProcess::Noise(framebuffer->colorBuffer, 100); 
+		PostProcess::Brightness(framebuffer->colorBuffer, 100); 
+		PostProcess::ColorBalance(framebuffer->colorBuffer, 0, 0, 100); 
+		PostProcess::Threshold(framebuffer->colorBuffer, 100);
 		framebuffer->Update(); 
 
 		renderer->CopyBuffer(framebuffer.get()); 

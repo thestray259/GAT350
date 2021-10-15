@@ -7,39 +7,38 @@
 
 Framebuffer::Framebuffer(Renderer* renderer, int width, int height)
 {
-    this->width = width;
-    this->height = height;
+    colorBuffer.width = width;
+    colorBuffer.height = height;
 
     texture = SDL_CreateTexture(renderer->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height); 
 
-    pitch = width * sizeof(color_t); 
-    buffer = new uint8_t[pitch * height];
+    colorBuffer.pitch = colorBuffer.width * sizeof(color_t);
+    colorBuffer.data = new uint8_t[colorBuffer.pitch * colorBuffer.height];
 }
 
 Framebuffer::~Framebuffer()
 {
     SDL_DestroyTexture(texture);
-    delete[] buffer;
 }
 
 void Framebuffer::Update()
 {
-    SDL_UpdateTexture(texture, nullptr, buffer, pitch); 
+    SDL_UpdateTexture(texture, nullptr, colorBuffer.data, colorBuffer.pitch);
 }
 
 void Framebuffer::Clear(const color_t& color)
 {
-    for (int i = 0; i < width * height; i++)
+    for (int i = 0; i < colorBuffer.width * colorBuffer.height; i++)
     {
-        ((color_t*)buffer)[i] = color; 
+        ((color_t*)colorBuffer.data)[i] = color;
     }
 }
 
 void Framebuffer::DrawPoint(int x, int y, const color_t& color)
 {
-    if (x < 0 || x >= width || y < 0 || y >= height) return; 
+    if (x < 0 || x >= colorBuffer.width || y < 0 || y >= colorBuffer.height) return;
 
-    ((color_t*)buffer)[x + y * width] = color;
+    ((color_t*)colorBuffer.data)[x + y * colorBuffer.width] = color;
 }
 
 void Framebuffer::DrawRect(int x, int y, int rect_width, int rect_height, const color_t& color)
@@ -282,17 +281,15 @@ int Framebuffer::Lerp(int a, int b, float t)
 
 void Framebuffer::DrawImage(int x1, int y2, Image* image)
 {
-    for (int y = 0; y < image->height; y++)
+    for (int y = 0; y < image->colorBuffer.height; y++)
     {
-        //int sy = <y start + y>;
-        int sy = y; 
-        for (int x = 0; x < image->width; x++)
+        int sy = y2 + y; 
+        for (int x = 0; x < image->colorBuffer.width; x++)
         {
-            //int sx = <x start + x>;
-            int sx = x; 
-            //if (<make sure to not write to the buffer if sx or sy is off - screen>) continue;
+            int sx = x1 + x; 
+            if (sx >= colorBuffer.width || sy >= colorBuffer.height) continue;
 
-            ((color_t*)buffer)[sx + (sy * width)] = ((color_t*)image->buffer)[x + (y * image->width)];
+            ((color_t*)colorBuffer.data)[sx + (sy * colorBuffer.width)] = ((color_t*)image->colorBuffer.data)[x + (y * image->colorBuffer.width)];
         }
     }
 }
