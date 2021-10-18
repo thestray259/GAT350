@@ -2,10 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-Image::~Image()
-{
-	delete[] colorBuffer.data;
-}
 
 bool Image::Load(const std::string& filename, uint8_t alpha)
 {

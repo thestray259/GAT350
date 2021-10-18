@@ -193,8 +193,10 @@ void Framebuffer::DrawCircleOctants(int cx, int cy, int x, int y, const color_t&
 {
     DrawPoint(cx + x, cy + y, color);
     DrawPoint(cx + x, cy - y, color);
-    DrawPoint(cx - x, cy + y, color);
-    DrawPoint(cx - x, cy - y, color);
+    //DrawPoint(cx - x, cy + y, color);
+    DrawLine(cx - x, cy + y, cx + x, cy + y,  color);
+    //DrawPoint(cx - x, cy - y, color);
+    DrawLine(cx - x, cy - y, cx + x, cy - y,  color);
 
     DrawPoint(cx + y, cy + x, color);
     DrawPoint(cx + y, cy - x, color);
