@@ -250,9 +250,4 @@ namespace PostProcess
             color.b = c;
         }
     }
-
-    void AlphaBlending(const ColorBuffer& colorBuffer)
-    {
-
-    }
 }
