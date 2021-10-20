@@ -184,9 +184,9 @@ namespace PostProcess
 
             if (x < 1 || x + 1 >= source.width || y < 1 || y + 1 >= source.width) continue;
 
-            uint16_t r = 0;
-            uint16_t g = 0;
-            uint16_t b = 0;
+            int16_t r = 0;
+            int16_t g = 0;
+            int16_t b = 0;
 
             for (int iy = -1; iy <= 1; iy++)
             {
@@ -224,14 +224,19 @@ namespace PostProcess
 
         for (int i = 0; i < colorBuffer.width * colorBuffer.height; i++)
         {
+            int x = i % source.width;
+            int y = i / source.width;
+
+            if (x < 1 || x + 1 >= source.width || y < 1 || y + 1 >= source.width) continue;
+
             int16_t h = 0;
             int16_t v = 0;
             for (int iy = -1; iy <= 1; iy++)
             {
                 for (int ix = -1; ix <= 1; ix++)
                 {
-                    h += ((color_t*)source.data)[(h + ix) + (v + iy) * source.width].r * kh[1 + iy][1 + ix];
-                    v += ((color_t*)source.data)[(h + ix) + (v + iy) * source.width].r * kv[1 + iy][1 + ix];
+                    h += ((color_t*)source.data)[(x + ix) + (y + iy) * source.width].r * kh[1 + iy][1 + ix];
+                    v += ((color_t*)source.data)[(x + ix) + (y + iy) * source.width].r * kv[1 + iy][1 + ix];
                 }
             }
             uint16_t result = (uint16_t)sqrt((h * h) + (v * v));
@@ -244,5 +249,10 @@ namespace PostProcess
             color.g = c;
             color.b = c;
         }
+    }
+
+    void AlphaBlending(const ColorBuffer& colorBuffer)
+    {
+
     }
 }

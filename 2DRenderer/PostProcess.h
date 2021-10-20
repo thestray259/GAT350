@@ -13,4 +13,5 @@ namespace PostProcess
 	void GaussianBlur(const ColorBuffer& colorBuffer); 
 	void Sharpen(const ColorBuffer& colorBuffer); 
 	void Edge(const ColorBuffer& colorBuffer, uint8_t threshold); 
+	void AlphaBlending(const ColorBuffer& colorBuffer); 
 }
