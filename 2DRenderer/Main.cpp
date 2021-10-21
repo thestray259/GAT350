@@ -31,7 +31,7 @@ int main(int, char**)
 			quit = true;
 			break;
 		}
-
+		 
 		framebuffer->Clear({ 0, 0, 0, 0 });
 		//for (int i = 0; i < 100; i++)
 		//{
