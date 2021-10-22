@@ -10,7 +10,7 @@ Framebuffer::Framebuffer(Renderer* renderer, int width, int height)
     colorBuffer.width = width;
     colorBuffer.height = height;
 
-    texture = SDL_CreateTexture(renderer->renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, width, height); 
+    texture = SDL_CreateTexture(renderer->renderer, SDL_PIXELFORMAT_ABGR8888, SDL_TEXTUREACCESS_STREAMING, width, height); 
 
     colorBuffer.pitch = colorBuffer.width * sizeof(color_t);
     colorBuffer.data = new uint8_t[colorBuffer.pitch * colorBuffer.height];

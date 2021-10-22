@@ -26,6 +26,9 @@
     <ClCompile Include="PostProcess.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Tracer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framebuffer.h">
@@ -41,6 +44,13 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="PostProcess.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h" />
+    <ClInclude Include="Ray.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Tracer.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
