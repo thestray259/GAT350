@@ -29,6 +29,15 @@
     <ClCompile Include="Tracer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="Sphere.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Plane.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framebuffer.h">
@@ -46,11 +55,25 @@
     <ClInclude Include="PostProcess.h">
       <Filter>Source</Filter>
     </ClInclude>
-    <ClInclude Include="Types.h" />
     <ClInclude Include="Ray.h">
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="Tracer.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Types.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Sphere.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Geometry.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="Plane.h">
       <Filter>Source</Filter>
     </ClInclude>
   </ItemGroup>
