@@ -9,6 +9,11 @@ public:
         center(center),
         radius(radius) {}
 
+    Sphere(const glm::vec3& center, float radius, std::shared_ptr<Material> material) :
+        Geometry{ material },
+        center{ center },
+        radius{ radius } {}
+
     bool Hit(const ray_t& r, float tMin, float tMax, raycastHit_t& hit) override;
 
 public:

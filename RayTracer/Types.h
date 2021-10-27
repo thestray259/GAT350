@@ -54,3 +54,8 @@ inline glm::vec3 randomInUnitSphere()
 
     return p;
 }
+
+inline glm::vec3 reflect(const glm::vec3& v, const glm::vec3& n)
+{
+    return v - (2 * dot(v, n) * n); 
+}

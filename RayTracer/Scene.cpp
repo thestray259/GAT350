@@ -15,12 +15,24 @@ glm::vec3 Scene::Trace(const ray_t& r, float tMin, float tMax, raycastHit_t& hit
 
     if (rayHit)
     {
-        glm::vec3 target = hit.point + hit.normal + randomInUnitSphere(); 
-        glm::vec3 direction = glm::normalize(target - hit.point); 
-        ray_t newRay{ hit.point, direction }; 
+        //glm::vec3 target = hit.point + hit.normal + randomInUnitSphere(); 
+        //glm::vec3 direction = glm::normalize(target - hit.point); 
+        //ray_t newRay{ hit.point, direction }; 
 
-        return { Trace(newRay, tMin, tMax, hit) * 0.5f }; 
-        //return hit.normal; 
+        //return { Trace(newRay, tMin, tMax, hit) * 0.5f }; 
+
+        ray_t scattered;
+        glm::vec3 attenuation;
+
+        if (hit.material->Scatter(r, hit, attenuation, scattered))
+        {
+            return attenuation * Trace(scattered, tMin, tMax, hit);
+        }
+        else
+        {
+            return { 0, 0, 0 };
+        }
+
     }
     
     glm::vec3 direction = glm::normalize(r.direction);
