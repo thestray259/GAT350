@@ -7,8 +7,8 @@ class Scene;
 class Tracer
 {
 public: 
-	void Trace(const ColorBuffer& colorBuffer, Scene* scene); 
+	void Trace(const ColorBuffer& colorBuffer, Scene* scene, class Camera* camera);
 
 public: 
-	int samples = 10; 
+	int samples = 100; 
 };
