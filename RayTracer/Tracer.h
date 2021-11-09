@@ -10,6 +10,6 @@ public:
 	void Trace(const ColorBuffer& colorBuffer, Scene* scene, class Camera* camera);
 
 public: 
-	int samples = 200; 
-	int depth = 30; 
+	int samples = 1000; 
+	int depth = 50; 
 };
