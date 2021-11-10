@@ -6,29 +6,26 @@
 #include "Scene.h" 
 #include "Plane.h"
 #include "Camera.h"
+#include "Buffer.h" 
 
 #include <iostream>
 #include <SDL.h>
 
 int main(int, char**)
 {
-	const int WIDTH = 800;
-	const int HEIGHT = 600;
+	const int WIDTH = 400;
+	const int HEIGHT = 300;
+    int samples = 0; 
 
 	std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>();
 	renderer->Initialize(WIDTH, HEIGHT);
 
 	std::unique_ptr<Framebuffer> framebuffer = std::make_unique<Framebuffer>(renderer.get(), renderer->width, renderer->height); 
+    std::unique_ptr<Buffer> accumBuffer = std::make_unique<Buffer>(renderer->width, renderer->height);
+    std::unique_ptr<Buffer> buffer = std::make_unique<Buffer>(renderer->width, renderer->height);
 
 	// ray tracer
 	std::unique_ptr<Tracer> tracer = std::make_unique<Tracer>();
-
-	//// samplers 
-	//std::shared_ptr<TextureSampler> texture1 = std::make_unique<TextureSampler>(std::make_unique<Image>("../Resources/poolball.bmp"));
-	//std::shared_ptr<TextureSampler> texture2 = std::make_unique<TextureSampler>(std::make_unique<Image>("../Resources/planet.bmp"));
-
-	//std::shared_ptr<CheckerSampler> black_checker = std::make_unique<CheckerSampler>(glm::vec3{ 0, 0, 0 }, glm::vec3{ 1, 1, 1 });
-	//std::shared_ptr<CheckerSampler> red_checker = std::make_unique<CheckerSampler>(glm::vec3{ 0, 0, 0 }, glm::vec3{ 1, 0, 0 });
 
     // samplers
     std::vector<std::shared_ptr<Sampler>> samplers;
@@ -93,9 +90,9 @@ int main(int, char**)
     std::unique_ptr<Camera> camera = std::make_unique<Camera>(eye, lookAt, glm::vec3{ 0, 1, 0 }, 20.0f, glm::ivec2{ framebuffer->colorBuffer.width, framebuffer->colorBuffer.height }, 0.1f, focalLength);
 
 	// render scene
-	framebuffer->Clear({ 0, 0, 0, 0 });
-	tracer->Trace(framebuffer->colorBuffer, scene.get(), camera.get()); 
-	framebuffer->Update(); 
+	//framebuffer->Clear({ 0, 0, 0, 0 });
+	//tracer->Trace(framebuffer->colorBuffer, scene.get(), camera.get()); 
+	//framebuffer->Update(); 
 
 	bool quit = false;
 	SDL_Event event;
@@ -108,6 +105,20 @@ int main(int, char**)
 			quit = true;
 			break;
 		}
+
+        // render to accumulation buffer
+        samples += tracer->samples;
+        std::string message = "Samples: " + std::to_string(samples);
+        tracer->Trace(accumBuffer.get(), scene.get(), camera.get(), message);
+
+        // copy accumulation buffer to buffer
+        *buffer.get() = *accumBuffer.get();
+        // process buffer values (average + sqrt)
+        buffer->Process(samples);
+
+        // copy buffer to frame buffer
+        buffer->Copy(framebuffer->colorBuffer);
+        framebuffer->Update();
 
 		renderer->CopyBuffer(framebuffer.get()); 
 		renderer->Present();
